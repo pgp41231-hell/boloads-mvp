@@ -288,6 +288,7 @@ async function api(req,res,url,session) {
     const {state}=await transact(session,s=>{expected(s,input);if(!s.campaign)fail('Create a draft first.');
       const before=Object.fromEntries(Object.keys(patch).map(k=>[k,s.campaign[k]]));
       Object.assign(s.campaign,patch);for(const k of Object.keys(patch))s.campaign.confirmedFields[k]=true;
+      s.campaign.suggestedFields=(s.campaign.suggestedFields||[]).filter(k=>!(k in patch));
       bump(s,'merchant','campaign_edit',before,patch,'Merchant edited campaign settings.');
       return null;});return json(res,200,stateView(state));
   }

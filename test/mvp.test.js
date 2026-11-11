@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { loadSeed, newState, field } from '../lib/model.js';
+import { loadSeed, newState, field, makeDraft } from '../lib/model.js';
 import { inspect, financials, approvalGate } from '../lib/rules.js';
 import { planFollowups } from '../lib/ai.js';
 
@@ -27,6 +27,24 @@ test('Chat treats extracted facts as known and asks each missing question once',
   state.chat=[{role:'assistant',content:'Which areas can you serve?',questionKeys:['serviceRegions']}];
   const followups=planFollowups(state,[],'not sure','en');
   assert.equal(followups.some(x=>['serviceRegions','offer','budgetTotal'].includes(x.key)),false);
+});
+
+test('Draft fills missing planning inputs without claiming merchant confirmation',()=>{
+  const state=newState('draft-starters');
+  state.profile.city=field('Aliganj','extracted_unconfirmed');
+  state.profile.budgetTotal=field(2000,'extracted_unconfirmed');
+  state.profile.startDate=field('2020-01-01','extracted_unconfirmed');
+  const draft=makeDraft(state);
+  state.campaign=draft;
+  assert.deepEqual(draft.targetRegions,['Aliganj']);
+  assert.equal(draft.budgetDaily,500);
+  assert.ok(draft.startDate>new Date().toISOString().slice(0,10));
+  assert.ok(draft.endDate>=draft.startDate);
+  assert.deepEqual(draft.suggestedFields.sort(),['budgetDaily','endDate','startDate','targetRegions']);
+  assert.equal(draft.confirmedFields.targetRegions,false);
+  assert.equal(draft.confirmedFields.budgetDaily,false);
+  assert.equal(inspect(state).results.find(x=>x.ruleId==='CFG_01').state,'PASS');
+  assert.equal(inspect(state).results.find(x=>x.ruleId==='GEO_01').state,'UNKNOWN');
 });
 
 test('Kirana calculation uses confirmed contribution and exact break-even formula',()=>{
