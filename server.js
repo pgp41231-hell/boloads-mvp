@@ -446,7 +446,7 @@ async function api(req,res,url,session) {
   fail('Endpoint not found.',404);
 }
 
-const server=http.createServer(async(req,res)=>{
+export const handler=async(req,res)=>{
   try {
     const url=new URL(req.url,`http://${req.headers.host||'localhost'}`);
     const session=sessionId(req,res);
@@ -463,6 +463,7 @@ const server=http.createServer(async(req,res)=>{
     if(req.url?.startsWith('/api/')) json(res,error.status||500,{error:error.message||'Server error.'});
     else {res.writeHead(error.code==='ENOENT'?404:error.status||500);res.end('Not found');}
   }
-});
-if(process.env.NODE_ENV!=='test')server.listen(port,()=>console.log(`BoloAds listening on http://localhost:${port}`));
+};
+const server=http.createServer(handler);
+if(process.env.NODE_ENV!=='test'&&!process.env.VERCEL)server.listen(port,()=>console.log(`BoloAds listening on http://localhost:${port}`));
 export { server, dedup, parseCsv, providerPreview };

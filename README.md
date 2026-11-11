@@ -15,3 +15,7 @@ The app keeps one private JSON file per anonymous browser session in `data/`. It
 The floating Guide suggests the next step in the six-step demo path. It starts open on desktop and compact on mobile; all settings and optional tools remain accessible at any time. Chat follow-ups use prior answers and avoid repeating questions already asked.
 
 Run `npm test` for deterministic rule and state gate checks.
+
+## Vercel deployment
+
+The repository includes a Vercel Function at `api/index.js` and a rewrite for `/api/*`; deploy with the Framework Preset set to **Other**. Static files are served from `public/`. On Vercel, session data is stored in `/tmp/boloads-data`, so it can disappear after a cold start or deployment. Use a database before relying on retained campaign sessions.
