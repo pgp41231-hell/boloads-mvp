@@ -219,7 +219,7 @@ async function api(req,res,url,session) {
     const answer=await chatCompletion(state,input.userText.slice(0,4000),input.locale||state.session.locale);
     const result=await transact(session,s=>{
       s.chat.push({id:id(),role:'user',language:input.locale||s.session.locale,content:input.userText,createdAt:now()});
-      s.chat.push({id:id(),role:'assistant',language:answer.language,content:[answer.assistantText,...answer.questions].join('\n'),createdAt:now(),extractedPatch:answer.facts});
+      s.chat.push({id:id(),role:'assistant',language:answer.language,content:[answer.assistantText,...answer.questions].join('\n'),createdAt:now(),extractedPatch:answer.facts,questionKeys:answer.questionKeys});
       for(const fact of answer.facts) if(s.profile[fact.field]?.source!=='user_confirmed')
         s.profile[fact.field]=field(fact.value,'extracted_unconfirmed');
       audit(s,'ai_extraction','llm',null,answer.facts,'suggested','Facts require merchant confirmation.');

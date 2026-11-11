@@ -5,6 +5,29 @@ import os from 'node:os';
 import path from 'node:path';
 import { loadSeed, newState, field } from '../lib/model.js';
 import { inspect, financials, approvalGate } from '../lib/rules.js';
+import { planFollowups } from '../lib/ai.js';
+
+test('Chat follows a no-delivery answer without repeating earlier questions',()=>{
+  const state=newState('chat-regression');
+  state.profile.city=field('Aliganj','extracted_unconfirmed');
+  state.profile.budgetTotal=field(2000,'extracted_unconfirmed');
+  state.chat=[
+    {role:'user',content:'Meri kirana dukaan Aliganj mein hai; weekend ₹2000 ka ad chahiye'},
+    {role:'assistant',content:'Which areas can you serve? What offer would you like to advertise?',questionKeys:['serviceRegions','offer']}
+  ];
+  const followups=planFollowups(state,[],'I cannot deliver; customers must visit the store','en');
+  assert.equal(followups.some(x=>x.key==='serviceRegions'||x.key==='offer'),false);
+  assert.equal(followups[0]?.key,'campaignRegions');
+});
+
+test('Chat treats extracted facts as known and asks each missing question once',()=>{
+  const state=newState('chat-extracted');
+  state.profile.offer=field('Weekend offer','extracted_unconfirmed');
+  state.profile.budgetTotal=field(2000,'extracted_unconfirmed');
+  state.chat=[{role:'assistant',content:'Which areas can you serve?',questionKeys:['serviceRegions']}];
+  const followups=planFollowups(state,[],'not sure','en');
+  assert.equal(followups.some(x=>['serviceRegions','offer','budgetTotal'].includes(x.key)),false);
+});
 
 test('Kirana calculation uses confirmed contribution and exact break-even formula',()=>{
   const state=loadSeed('00000000-0000-0000-0000-000000000001','kirana');
