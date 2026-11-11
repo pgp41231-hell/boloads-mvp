@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#16232d">
+  <title>BoloAds — Make ads harder to get wrong</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="top-stripe"></div>
+  <div id="app" class="app-shell">
+    <aside id="sidebar" class="sidebar" aria-label="Campaign steps"></aside>
+    <div class="workspace">
+      <header id="topbar" class="topbar"></header>
+      <div class="content-grid">
+        <main id="main" tabindex="-1"></main>
+        <aside id="context" class="context-panel" aria-label="Campaign context"></aside>
+      </div>
+      <nav id="mobile-nav" class="mobile-nav" aria-label="Step controls"></nav>
+    </div>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

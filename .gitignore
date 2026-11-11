@@ -1,0 +1,7 @@
+data/
+.env
+config.local.json
+prd_extracted.txt
+extract_prd.py
+node_modules/
+coverage/
